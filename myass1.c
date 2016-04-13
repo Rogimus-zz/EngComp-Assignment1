@@ -1,3 +1,4 @@
+/* coding is fun */
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -19,7 +20,9 @@ void find_room_type(int room_type);
 int main(int argc, char *argv[]) {
   int appartment_number,
     room_type,
-    room_number;
+    room_number,
+    prev_room_type,
+    prev_room_num;
   double xsize,
     ysize,
     total_area;
@@ -36,6 +39,7 @@ int main(int argc, char *argv[]) {
     /* generate the body of the table */
     while (scanf("%d", &room_type)==1){
 
+      /* if a -1 is read, it will be read here */
       if (room_type==-1) {
         break;
       } 
