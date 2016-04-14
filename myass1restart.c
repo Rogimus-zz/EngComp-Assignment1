@@ -33,10 +33,18 @@ typedef struct {
   double total_area;
 } appartment_t;
 
+typedef struct {
+  double dry_area;
+  double dry_area_percent;
+  double wet_area;
+  double wet_area_percent;
+  double storage_area;
+  double storage_area_percent;
+} areas_t;
 
 void Print_Room_Type(int room_type);
 
-
+areas_t Print_Room_Area(appartment_t x);
 
 int main(int argc, char *argv[]) {
   double area_sum; 
@@ -44,6 +52,8 @@ int main(int argc, char *argv[]) {
     appartment_index,
     num_appartments,
     i;
+
+  areas_t appartment_area;
 
   appartment_t appartments[MAXAPPARTMENTS];
 
@@ -79,7 +89,7 @@ int main(int argc, char *argv[]) {
   /* PRINT THE RESULTS */
 
   /* print the title of the individual appartment's table */
-  for (i = 0; i < num_appartments ; i++){
+  for (i = 0; i < num_appartments ; i++) {
     printf("Appartment %d\n", appartments[i].appartment_number);
     printf("--------------\n");
 
@@ -88,17 +98,17 @@ int main(int argc, char *argv[]) {
     area_sum = appartments[i].room[room_index].area;
     while( appartments[i].room[room_index].room_type != -1 ){
       Print_Room_Type(appartments[i].room[room_index].room_type);
-      
+
       if ( appartments[i].room[room_index].room_type ==
            appartments[i].room[room_index+1].room_type &&
            appartments[i].room[room_index].room_occurence ==
            appartments[i].room[room_index+1].room_occurence) {
-        
+
         printf("%d %5.2lf %5.2lf   ---\n",
                appartments[i].room[room_index].room_occurence,
                appartments[i].room[room_index].xsize,
                appartments[i].room[room_index].ysize);
-        
+
         area_sum += appartments[i].room[room_index+1].area;
       } else {
         printf("%d %5.2lf %5.2lf %6.2lf\n",
@@ -112,6 +122,20 @@ int main(int argc, char *argv[]) {
     }
     printf("    Total area              %.2lf metres^2\n\n",appartments[i].total_area);
   }
+
+  /*stage 4 */
+  for ( i = 0; i < num_appartments; i++) {
+    appartment_area = Print_Room_Area(appartments[i]);
+    printf("|  %3d  | %5.2lf %5.1lf%% | %5.2lf %5.1lf%% | %5.2lf %5.1lf%% |\n",
+           appartments[i].appartment_number,
+           appartment_area.dry_area,
+           appartment_area.dry_area_percent,
+           appartment_area.wet_area,
+           appartment_area.wet_area_percent,
+           appartment_area.storage_area,
+           appartment_area.storage_area_percent);
+  }
+
   return 0;
 }
 
@@ -135,7 +159,43 @@ Print_Room_Type(int room_type ) {
     printf("    Storage  ");
   } else if (room_type == GARAGE) {
     printf("    Garage   ");
-  } else {
+  } else if (room_type == BALCONY) {
     printf("    Balcony  ");
+  } else {
+    exit(EXIT_FAILURE);
   }
+}
+
+areas_t
+Print_Room_Area(appartment_t x){
+  areas_t areas;
+  int i;
+
+  areas.dry_area = areas.dry_area_percent = areas.wet_area =
+    areas.wet_area_percent = areas.storage_area = areas.storage_area_percent
+    = 0;
+
+  i=0;
+  while( x.room[i].room_type != -1 ) {
+    if( x.room[i].room_type == HALLWAY || x.room[i].room_type == BEDROOM ||
+        x.room[i].room_type == LIVING ) {
+      areas.dry_area+= x.room[i].area;
+    } else if( x.room[i].room_type == BATHROOM || x.room[i].room_type == KITCHEN ||
+               x.room[i].room_type == LAUNDRY) {
+      areas.wet_area+= x.room[i].area;
+    } else if( x.room[i].room_type == STORAGE || x.room[i].room_type == GARAGE ||
+        x.room[i].room_type == BALCONY) {
+      areas.storage_area+= x.room[i].area;
+    } else {
+      exit(EXIT_FAILURE);
+    }
+    i++;
+
+  }
+
+  areas.dry_area_percent = 100 * areas.dry_area/ x.total_area;
+  areas.wet_area_percent = 100 * areas.wet_area/ x.total_area;
+  areas.storage_area_percent = 100 * areas.storage_area/ x.total_area;
+ 
+  return areas;
 }
